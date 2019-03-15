@@ -3,6 +3,7 @@ package com.example.nemo1.ifixit.V;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -36,6 +38,8 @@ public class DetailFragment extends Fragment implements onSendData,onClickURL {
     private iFixitPresenter iFixitPresenter;
     private ProgressBar progressBar;
     private onCallBack onCallBack;
+    private WifiManager wifiManager;
+    private ImageView wifiStatus;
 
     @Override
     public void onAttach(Context context) {
@@ -53,14 +57,28 @@ public class DetailFragment extends Fragment implements onSendData,onClickURL {
         View view = inflater.inflate(R.layout.fragment_detail,container,false);
         recyclerView = view.findViewById(R.id.list_detail);
         progressBar = view.findViewById(R.id.progress_icon);
-        initComponent(progressBar,recyclerView);
-        //gtArgument from LayoutFragmentActivity.
-        if(getArguments() != null){
-            String search = getArguments().getString("search");
-            iFixitPresenter = new iFixitPresenter(this,search);
-        }
+        wifiStatus = view.findViewById(R.id.wifi_status);
+        checkWifiStatus();
         return view;
     }
+
+    //Check wifi status on or off
+    private void checkWifiStatus() {
+        wifiManager = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        Log.d("wifiCheck",String.valueOf(wifiManager.getWifiState()));
+        if(wifiManager.isWifiEnabled()){
+            //getArgument from LayoutFragmentActivity.
+            initComponent(progressBar,recyclerView);
+            if(getArguments() != null){
+                String search = getArguments().getString("search");
+                iFixitPresenter = new iFixitPresenter(this,search);
+            }
+        }
+        else {
+            wifiStatus.setVisibility(View.VISIBLE);
+        }
+    }
+
 
     private void initComponent(ProgressBar progressBar, RecyclerView recyclerView) {
         progressBar.setVisibility(View.VISIBLE);
